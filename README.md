@@ -4,7 +4,7 @@ Recipe.java - Not Started
 RecipeMaker.java - Not Started  
 RecipeMakerUI.java - Not Started  
 
-This is a project for a desktop app in Electron that is designed to be a recipe maker and manager.  
+This is a project for a desktop app in Electron (framework for web design languages [HTML, CSS, and JavaScript(or TypeScript)] that is used to make desktop apps for all major operating systems) that is designed to be a recipe maker and manager.  
 The code will be ported from a version of the app I did in Java (N.b. Java:JavaScript :: ham:hamster).  
 In RecipeMaker folder/directory, there is the original Java code that this project will be based off of.  
 None of the actual code will be used; it is only there for reference. No pull requests for that code will be approved.  
