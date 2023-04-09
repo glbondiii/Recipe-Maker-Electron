@@ -2,6 +2,10 @@ import Recipe from "./Recipe";
 
 const fs: any = require("fs");
 
+/**
+ * Makes a list of existing recipes based on the contents of the Recipe folder; if a Recipe folder does not exist, then the function makes one.
+ * @returns recipesList: string[]
+ */
 export function makeRecipeList(): string[] {
     let recipesList: string[] = [];
     
@@ -43,6 +47,12 @@ export function makeRecipeList(): string[] {
     return recipesList;
 }
 
+/**
+ * Makes sure that the chosen recipe exists or is in the recipe list before progressing further
+ * @param recipeList 
+ * @param dishName 
+ * @returns true if recipe is in list; false if it is not
+ */
 export function checkRecipeExists(recipeList: string[], dishName: string): boolean {
     let size: number = recipeList.length;
 
@@ -55,6 +65,11 @@ export function checkRecipeExists(recipeList: string[], dishName: string): boole
     return false;
 }
 
+/**
+ * Reads in a recipe from the corresponding JSON file
+ * @param dishName 
+ * @returns recipe: Recipe
+ */
 export function readRecipe(dishName: string): Recipe {
     let filePath: string = "./Recipes/" + dishName.toLowerCase() + ".json";
 
@@ -68,6 +83,10 @@ export function readRecipe(dishName: string): Recipe {
 
 }
 
+/**
+ * Writes a recipe to the corresponding JSON file
+ * @param recipe 
+ */
 export function writeRecipe(recipe: Recipe): void {
     let filePath: string = "./Recipes/" + recipe.dishName + ".json";
 
