@@ -53,16 +53,17 @@ export function makeRecipeList(): string[] {
  * @returns recipe: Recipe
  */
 export function readRecipe(dishName: string): Recipe {
-    let filePath: string = "./Recipes/" + dishName.toLowerCase() + ".json";
 
-    let fileCont: any = require(filePath);
+    let lowerCaseDishName: string = dishName.toLowerCase();
+
+    let fileCont: any = require(`../Recipes/${lowerCaseDishName}.json`);
 
     let recipe: Recipe = new Recipe(fileCont._dishName, fileCont._ingredients,
         fileCont._instructions, fileCont._modifications);
 
     console.log(recipe.fileName + " file read.");
-    return recipe;
 
+    return recipe;
 }
 
 /**
@@ -70,7 +71,7 @@ export function readRecipe(dishName: string): Recipe {
  * @param recipe 
  */
 export function writeRecipe(recipe: Recipe): void {
-    let filePath: string = "./Recipes/" + recipe.dishName + ".json";
+    let filePath: string = `./Recipes/${recipe.dishName}.json`;
 
     fs.writeFileSync(filePath, JSON.stringify(recipe), (error: any) => {
         if (error) {

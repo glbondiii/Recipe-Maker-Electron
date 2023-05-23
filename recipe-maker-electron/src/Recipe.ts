@@ -10,7 +10,7 @@ class Recipe {
     //Constructor
     public constructor(dishName: string, ingredients: string[], 
         instructions: string[], modifications: string[]) {
-        this._dishName = dishName.toLowerCase();
+        this._dishName = dishName.toLowerCase().trim();
         this._fileName = "Recipes/" + this._dishName + ".json";
         this._ingredients = ingredients;
         this._instructions = instructions;
@@ -40,7 +40,7 @@ class Recipe {
 
     //Setters
     set dishName(newName: string) {
-        this._dishName = newName.toLowerCase();
+        this._dishName = newName.toLowerCase().trim();
         this._fileName = "Recipe/" + this._dishName + ".json";
     }
 
