@@ -5,8 +5,8 @@ import { contextBridge, ipcRenderer } from "electron";
 import Recipe from "./Recipe";
 
 contextBridge.exposeInMainWorld('reciMakeAPI', {
-    makeRecipeList: () => ipcRenderer.invoke("makeRecipeList"),
-    readRecipe: (dishName: string) => ipcRenderer.invoke("readRecipe", dishName),
+    makeRecipeList: (): Promise<string[]> => ipcRenderer.invoke("makeRecipeList"),
+    readRecipe: (dishName: string): Promise<Recipe> => ipcRenderer.invoke("readRecipe", dishName),
     writeRecipe: (recipe: Recipe) => ipcRenderer.invoke("writeRecipe", recipe),
     deleteRecipe: (recipe: Recipe) => ipcRenderer.invoke("deleteRecipe", recipe),
 });

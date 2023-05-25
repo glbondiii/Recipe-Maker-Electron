@@ -34,14 +34,14 @@ const createWindow = (): void => {
 // Some APIs can only be used after this event occurs.
 app.on('ready', () => {
     ipcMain.handle("makeRecipeList", RMIO.makeRecipeList);
-    ipcMain.handle("readRecipe", (submit, dishName: string) => {
+    ipcMain.handle("readRecipe", (event, dishName: string): Recipe => {
         let recipe: Recipe = RMIO.readRecipe(dishName);
         return recipe;
     })
-    ipcMain.handle("writeRecipe", (submit, recipe: Recipe) => {
+    ipcMain.handle("writeRecipe", (event, recipe: Recipe) => {
         RMIO.writeRecipe(recipe);
     });
-    ipcMain.handle("deleteRecipe", (submit, recipe: Recipe) => {
+    ipcMain.handle("deleteRecipe", (event, recipe: Recipe) => {
         RMIO.deleteRecipe(recipe);
     })
 
