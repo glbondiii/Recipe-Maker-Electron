@@ -25,6 +25,7 @@
  *  });
  * ```
  */
+
 import './index.css';
 import Recipe from './Recipe';
 import * as RM from './RecipeMaker';
@@ -32,16 +33,30 @@ import * as RM from './RecipeMaker';
 
 console.log('👋 This message is being logged by "renderer.js", included via webpack');
 
-let recipeList: Promise<string[]> = window.reciMakeAPI.makeRecipeList();
+//This does not actually store the recipe list...
+let recipeList: string[] = [];
+//AND THE PROBLEM IS THE PROMISE!!!!!!!!!!!!
+//It's because resolved Promises are immutable
+let recipeListPromise: Promise<Recipe[]> = window.reciMakeAPI.makeRecipeList();
 
-recipeList.then(
+recipeListPromise.then(
     (list) => {
         console.log(list);
         console.log(RM.checkRecipeExists(list, "CaKe"));
         console.log(RM.checkRecipeExists(list, "memes"));
-        console.log(RM.checkRecipeExists(list, "willnotwork"))
+        console.log(RM.checkRecipeExists(list, "willnotwork"));
     }
 )
+
+async function unwrapRecipeList() {
+    let recipeListUnwrap = ["One", "Tewo", "Twhee"];
+    recipeList = recipeListUnwrap;
+    console.log("During: " + recipeList);
+}
+
+console.log("Before: " + recipeList);
+unwrapRecipeList();
+console.log("After: " + recipeList);
 
 let activeRecipe: Recipe = null;
 console.log(`activeRecipe set to ${activeRecipe}`);
@@ -51,11 +66,34 @@ const listRecipes = document.querySelector("#listRecipes") as HTMLInputElement |
 
 if (listRecipes !== null) {
     listRecipes.addEventListener("click", () => {
-        recipeList.then(
+        recipeListPromise.then(
             (list) => {
-                alert("List of Recipes:\n" + RM.printList(list));
+                alert("List of Recipes:\n" + RM.printRecipeList(list));
             }
         )
+    });
+}
+
+const addRecipe = document.querySelector("#addRecipe") as HTMLInputElement | null;
+
+if (addRecipe !== null) {
+    addRecipe.addEventListener("click", async (e) => {
+        e.preventDefault();
+        let dishNameInput: string = await prompt().trim();
+        if (dishNameInput === null) {
+            return;
+        }
+        if (dishNameInput === "") {
+            alert("No name entered");
+            return;
+        }
+        if (RM.checkRecipeExists(await recipeListPromise, dishNameInput)) {
+            alert("Recipe already exists.");
+            return;
+        }
+        activeRecipe = new Recipe(dishNameInput, [], [], []);
+        window.reciMakeAPI.writeRecipe(activeRecipe);
+        recipeListPromise = window.reciMakeAPI.makeRecipeList();
     });
 }
 
@@ -64,14 +102,15 @@ const readRecipe = document.querySelector("#readRecipe") as HTMLFormElement | nu
 if (readRecipe !== null) {
     readRecipe.addEventListener("submit", async (e) => {
         e.preventDefault();
-        //Problem: Method not returning as Recipe Object
-        //Solution (as of 5/23/23): Return an any Object and make the Recipe object in this function
-        let activeRecipeAny: any = await RM.readRecipe(recipeList);
+        //Problem: Method returning as an any Object, instead of a Recipe Object
+        //Solution (as of 5/23/23): Take the any Object and make the Recipe object in this function
+        //with the fields of that object
+        //NOTE: THIS APPLIES FOR BASICALLY ANY FUNCTION THAT USES Recipe AS AN ARGUMENT
+        let activeRecipeAny: any = await RM.readRecipe(await recipeListPromise);
 
-        activeRecipe = new Recipe(activeRecipeAny._dishName, activeRecipeAny._ingredients,
+        if (activeRecipeAny !== null) {
+            activeRecipe = new Recipe(activeRecipeAny._dishName, activeRecipeAny._ingredients,
             activeRecipeAny._instructions, activeRecipeAny._modifications);
-
-        if (activeRecipe !== null) {
             //TODO: Figure out how to get to next screen
             console.log(activeRecipe);
             document.getElementById("activeRecipe").innerHTML = `Active Recipe: ${activeRecipe.dishName}`;
@@ -118,5 +157,18 @@ if (listModifications !== null) {
             alert(`${activeRecipe.dishName}'s Modifications\n` + 
                 RM.printList(activeRecipe.modifications));
         }
+    });
+}
+
+const deleteRecipe = document.querySelector("#deleteRecipe") as HTMLInputElement | null;
+
+if (deleteRecipe !== null) {
+    deleteRecipe.addEventListener("click", () => {
+        if(!confirm(`Are you sure you want to delete ${activeRecipe.dishName}?`)) {
+            return;
+        }
+        window.reciMakeAPI.deleteRecipe(activeRecipe);
+        recipeListPromise = window.reciMakeAPI.makeRecipeList();
+        location.reload();
     });
 }
