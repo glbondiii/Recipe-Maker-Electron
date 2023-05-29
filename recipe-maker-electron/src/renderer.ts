@@ -63,6 +63,9 @@ function loadPrintMenu(): void {
 
 	body.innerHTML = Templates.printMenu;
 	initializeMenuTransportButtons();
+	initializePrintMenuVariables();
+
+	console.log(dishNameHeader); 
 
 	if (dishNameHeader !== null) {
 		dishNameHeader.innerHTML = activeRecipe.dishName;
@@ -91,6 +94,7 @@ function loadEditMenu(): void {
 
 	body.innerHTML = Templates.editMenu;
 	initializeMenuTransportButtons();
+	initializeEditMenuVariables();
 	initializeEditMenuButtons();
 
 	if (activeRecipeHTML !== null) {
@@ -131,27 +135,39 @@ let activeRecipe: Recipe = null;;
 console.log(`activeRecipe set to ${activeRecipe}`);
 
 //Print Menu Variables
-const dishNameHeader = document.getElementById("dishNameHeader") as HTMLElement | null;
-const ingredientsOL = document.getElementById("ingredientsOL") as HTMLElement | null;
-const instructionsOL = document.getElementById("instructionsOL") as HTMLElement | null;
-const modificationsOL = document.getElementById("modificationsOL") as HTMLElement | null;
+let dishNameHeader = document.getElementById("dishNameHeader") as HTMLElement | null;
+let ingredientsOL = document.getElementById("ingredientsOL") as HTMLElement | null;
+let instructionsOL = document.getElementById("instructionsOL") as HTMLElement | null;
+let modificationsOL = document.getElementById("modificationsOL") as HTMLElement | null;
+
+function initializePrintMenuVariables() {
+	dishNameHeader = document.getElementById("dishNameHeader") as HTMLElement | null;
+	ingredientsOL = document.getElementById("ingredientsOL") as HTMLElement | null;
+	instructionsOL = document.getElementById("instructionsOL") as HTMLElement | null;
+	modificationsOL = document.getElementById("modificationsOL") as HTMLElement | null;
+}
 
 //Edit Menu Variables 
-const activeRecipeHTML = document.getElementById("activeRecipeHTML") as HTMLElement | null;
-const activeElement = document.getElementById("activeElement") as HTMLElement | null;
+let activeRecipeHTML = document.getElementById("activeRecipeHTML") as HTMLElement | null;
+let activeElement = document.getElementById("activeElement") as HTMLElement | null;
 let activeList: string[];
 let listLength: number;
-const activeMode = document.getElementById("activeMode") as HTMLElement | null;
+let activeMode = document.getElementById("activeMode") as HTMLElement | null;
 let activeModeString: string;
-const activeListElement = document.getElementById("activeList") as HTMLElement | null;
+let activeListElement = document.getElementById("activeList") as HTMLElement | null;
 
+function initializeEditMenuVariables() {
+	activeRecipeHTML = document.getElementById("activeRecipeHTML") as HTMLElement | null;
+	activeElement = document.getElementById("activeElement") as HTMLElement | null;
+	activeMode = document.getElementById("activeMode") as HTMLElement | null;
+	activeListElement = document.getElementById("activeList") as HTMLElement | null;
+}
 
 function initializeMenuTransportButtons() {
 	const printRecipe = document.querySelector("#printRecipe") as HTMLInputElement | null;
 
 	if (printRecipe !== null) {
-		printRecipe.addEventListener("click", (e) => {
-			e.preventDefault();
+		printRecipe.addEventListener("click", () => {
 			loadPrintMenu();
 		});
 	}
@@ -159,8 +175,7 @@ function initializeMenuTransportButtons() {
 	const editRecipe = document.querySelector("#editRecipe") as HTMLInputElement | null;
 
 	if (editRecipe !== null) {
-		editRecipe.addEventListener("click", (e) => {
-			e.preventDefault();
+		editRecipe.addEventListener("click", () => {
 			loadEditMenu();
 		});
 	}
@@ -168,8 +183,7 @@ function initializeMenuTransportButtons() {
 	const returnToMain = document.querySelector("#mainMenu") as HTMLInputElement | null;
 
 	if (returnToMain !== null) {
-		returnToMain.addEventListener("click", (e) => {
-			e.preventDefault();
+		returnToMain.addEventListener("click", () => {
 			loadMainMenu();
 		});
 	}
@@ -262,6 +276,7 @@ function initializeMainMenuButtons() {
 
 function initializeEditMenuButtons() {
 	const renameRecipe = document.querySelector("#renameRecipe") as HTMLFormElement | null;
+	console.log(activeRecipeHTML);
 
 	if (renameRecipe !== null) {
 		renameRecipe.addEventListener("submit", (e) => {
