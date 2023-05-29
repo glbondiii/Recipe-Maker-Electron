@@ -28,13 +28,13 @@ export function checkRecipeExists(recipeList: any[], dishName: string): number {
 
 /**
  * Turns a Recipe array into a string of a numbered list
- * @param list 
- * @returns listString: string
+ * @param recipeList 
+ * @returns recipeListString: string
  */
-export function printRecipeList(list: any[]): string {  
-    let listString: string = "";
+export function printRecipeList(recipeList: any[]): string {  
+    let recipeListString: string = "";
 
-    let size: number = list.length;
+    let size: number = recipeList.length;
 
     if (size === 0) {
         return "Nothing to list";
@@ -42,14 +42,14 @@ export function printRecipeList(list: any[]): string {
 
     for (let i = 0; i < size; i++) {
         if (i === size-1) {
-            listString = listString.concat(`${i+1}. ${list[i]._dishName}`);
+            recipeListString = recipeListString.concat(`${i+1}. ${recipeList[i]._dishName}`);
         }
         else {
-            listString = listString.concat(`${i+1}. ${list[i]._dishName}\n`);
+            recipeListString = recipeListString.concat(`${i+1}. ${recipeList[i]._dishName}\n`);
         }
     }
 
-    return listString;
+    return recipeListString;
 }
 /**
  * Turns a string array into a string of a numbered list
@@ -75,6 +75,22 @@ export function printList(list: string[]): string {
     }
 
     return listString;
+}
+
+/**
+* Turns a string array into a HTML ordered list
+* @param list
+* @ returns listHTML: string
+*/
+export function makeOrderedHTMLList(list: string[]): string {
+	if (list.length <= 0) {
+		return "<li>Nothing to List</li>";
+	}
+	let listHTML: string = "";
+	list.forEach( (element) => {
+		listHTML = listHTML.concat(`<li>${element}</li>\n`);
+	})
+	return listHTML;
 }
 
 /**
