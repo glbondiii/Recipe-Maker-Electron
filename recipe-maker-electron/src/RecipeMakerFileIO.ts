@@ -6,8 +6,8 @@ const fs: any = require("fs");
  * Makes a list of existing recipes based on the contents of the Recipe folder; if a Recipe folder does not exist, then the function makes one.
  * @returns recipeList: string[]
  */
-export function makeRecipeList(): string[] {
-    let recipeList: string[] = [];
+export function makeRecipeList(): Recipe[] {
+    let recipeList: Recipe[] = [];
     
     let recipesFolder: string = "./Recipes";
 
@@ -34,8 +34,11 @@ export function makeRecipeList(): string[] {
 
     fs.readdirSync(recipesFolder).forEach( (file: any) => {
         let fileSplit: string[] = file.split(".");
-        let recipe: string = fileSplit[0].toLowerCase();
+        let recipeName = fileSplit[0].trim();
         if (fileSplit[1] == "json") {
+            let recipeAny: any = readRecipe(recipeName);
+            let recipe: Recipe = new Recipe(recipeAny._dishName, recipeAny._ingredients, 
+                recipeAny._instructions, recipeAny._modifications);
             recipeList.push(recipe);
             console.log(file + " added to list.");
         }
@@ -56,7 +59,15 @@ export function readRecipe(dishName: string): Recipe {
 
     let lowerCaseDishName: string = dishName.toLowerCase();
 
-    let fileCont: any = require(`../Recipes/${lowerCaseDishName}.json`);
+    let fileCont: any;
+
+    try {
+        fileCont = require(`../Recipes/${lowerCaseDishName}.json`);
+    }
+    catch (e) {
+        console.log("Something went wrong; try resetting the app.");
+        return null;
+    }
 
     let recipe: Recipe = new Recipe(fileCont._dishName, fileCont._ingredients,
         fileCont._instructions, fileCont._modifications);
@@ -70,15 +81,15 @@ export function readRecipe(dishName: string): Recipe {
  * Writes a recipe to the corresponding JSON file
  * @param recipe 
  */
-export function writeRecipe(recipe: Recipe): void {
-    let filePath: string = `./Recipes/${recipe.dishName}.json`;
+export function writeRecipe(recipe: any): void {
+    let filePath: string = `./Recipes/${recipe._dishName}.json`;
 
     fs.writeFileSync(filePath, JSON.stringify(recipe), (error: any) => {
         if (error) {
             console.log(error)
         }
         else {
-            console.log(recipe.fileName + " file written to.")
+            console.log(recipe._fileName + " file written to.")
         }
     });
 
@@ -88,7 +99,16 @@ export function writeRecipe(recipe: Recipe): void {
  * Deletes the corresponding JSON file to the parameter recipe
  * @param recipe 
  */
-export function deleteRecipe(recipe: Recipe): void {
-    let filePath: string = "./Recipes/" + recipe.dishName + ".json";
+export function deleteRecipe(recipe: any): void {
+    let filePath: string = `./Recipes/${recipe._dishName}.json`;
+
+    fs.unlinkSync(filePath, (error: any) => {
+        if (error) {
+            console.log(error);
+        }
+        else {
+            console.log(recipe._fileName + " file deleted");
+        }
+    })
 }
 
