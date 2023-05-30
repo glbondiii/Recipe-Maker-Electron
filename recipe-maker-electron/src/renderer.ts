@@ -33,9 +33,66 @@ import * as Templates from './templates';
 
 console.log('👋 This message is being logged by "renderer.js", included via webpack');
 
-//Menu Transport Functions
+//General Menu Variables
+const body: HTMLBodyElement = document.getElementsByTagName("body").item(0);
+let activeMenu: string;
+
+//Resolved Promises are immutable; don't try to use a normal array
+let recipeListPromise: Promise<Recipe[]> = window.reciMakeAPI.makeRecipeList();
+
+recipeListPromise.then(
+	(list) => {
+		console.log(list);
+		console.log(RM.checkRecipeExists(list, "CaKe"));
+		console.log(RM.checkRecipeExists(list, "rick"));
+		console.log(RM.checkRecipeExists(list, "PIZZA"));
+		console.log(RM.checkRecipeExists(list, "memes"));
+		console.log(RM.checkRecipeExists(list, "willnotwork"));
+	}
+)
+
+let activeRecipe: Recipe = null;;
+console.log(`activeRecipe set to ${activeRecipe}`);
+
+//Print Menu Variables
+let dishNameHeader = document.getElementById("dishNameHeader") as HTMLElement | null;
+let ingredientsOL = document.getElementById("ingredientsOL") as HTMLElement | null;
+let instructionsOL = document.getElementById("instructionsOL") as HTMLElement | null;
+let modificationsOL = document.getElementById("modificationsOL") as HTMLElement | null;
+
+//Edit Menu Variables 
+let activeRecipeHTML = document.getElementById("activeRecipeHTML") as HTMLElement | null;
+let activeElement = document.getElementById("activeElement") as HTMLElement | null;
+let activeElementString: string;
+let activeList: string[];
+let listLength: number;
+let activeMode = document.getElementById("activeMode") as HTMLElement | null;
+let activeModeString: string;
+let activeListElement = document.getElementById("activeList") as HTMLElement | null;
+
+//Save Function
+async function saveRecipeFunction(): Promise<void> {
+	if (activeRecipe === null) {
+		alert("No active recipe");
+		return;
+	}
+
+	let index: number = RM.checkRecipeExists(await recipeListPromise, activeRecipe.dishName);
+
+	recipeListPromise.then(
+		(list) => {
+			list[index] = activeRecipe;
+		}
+	)
+
+	window.reciMakeAPI.writeRecipe(activeRecipe);
+}
+
+
+//Menu Loading Functions
 function loadMainMenu(): void {
 	if (activeMenu === "edit") {
+		saveRecipeFunction();
 	}
 
 	body.innerHTML = Templates.mainMenu;
@@ -52,6 +109,10 @@ function loadMainMenu(): void {
 	activeMenu = "main";
 }
 
+function loadRecipeList(): void {
+
+}
+
 function loadPrintMenu(): void {
 	if (activeRecipe === null) {
 		alert("No active recipe");
@@ -59,6 +120,7 @@ function loadPrintMenu(): void {
 	}
 
 	if (activeMenu === "edit") {
+		saveRecipeFunction();
 	}
 
 	body.innerHTML = Templates.printMenu;
@@ -103,6 +165,7 @@ function loadEditMenu(): void {
 
 	//Default List and Mode
 	activeList = activeRecipe.ingredients;
+	activeElementString = "ingredients";
 	listLength = activeList.length;
 	activeModeString = "add";
 
@@ -113,33 +176,7 @@ function loadEditMenu(): void {
 	activeMenu = "edit"
 }
 
-//General Menu Variables
-const body: HTMLBodyElement = document.getElementsByTagName("body").item(0);
-let activeMenu: string;
-
-//Resolved Promises are immutable; don't try to use a normal array
-let recipeListPromise: Promise<Recipe[]> = window.reciMakeAPI.makeRecipeList();
-
-recipeListPromise.then(
-	(list) => {
-		console.log(list);
-		console.log(RM.checkRecipeExists(list, "CaKe"));
-		console.log(RM.checkRecipeExists(list, "rick"));
-		console.log(RM.checkRecipeExists(list, "PIZZA"));
-		console.log(RM.checkRecipeExists(list, "memes"));
-		console.log(RM.checkRecipeExists(list, "willnotwork"));
-	}
-)
-
-let activeRecipe: Recipe = null;;
-console.log(`activeRecipe set to ${activeRecipe}`);
-
-//Print Menu Variables
-let dishNameHeader = document.getElementById("dishNameHeader") as HTMLElement | null;
-let ingredientsOL = document.getElementById("ingredientsOL") as HTMLElement | null;
-let instructionsOL = document.getElementById("instructionsOL") as HTMLElement | null;
-let modificationsOL = document.getElementById("modificationsOL") as HTMLElement | null;
-
+//Initialize Variable and Button Functions
 function initializePrintMenuVariables() {
 	dishNameHeader = document.getElementById("dishNameHeader") as HTMLElement | null;
 	ingredientsOL = document.getElementById("ingredientsOL") as HTMLElement | null;
@@ -147,14 +184,6 @@ function initializePrintMenuVariables() {
 	modificationsOL = document.getElementById("modificationsOL") as HTMLElement | null;
 }
 
-//Edit Menu Variables 
-let activeRecipeHTML = document.getElementById("activeRecipeHTML") as HTMLElement | null;
-let activeElement = document.getElementById("activeElement") as HTMLElement | null;
-let activeList: string[];
-let listLength: number;
-let activeMode = document.getElementById("activeMode") as HTMLElement | null;
-let activeModeString: string;
-let activeListElement = document.getElementById("activeList") as HTMLElement | null;
 
 function initializeEditMenuVariables() {
 	activeRecipeHTML = document.getElementById("activeRecipeHTML") as HTMLElement | null;
@@ -276,10 +305,9 @@ function initializeMainMenuButtons() {
 
 function initializeEditMenuButtons() {
 	const renameRecipe = document.querySelector("#renameRecipe") as HTMLFormElement | null;
-	console.log(activeRecipeHTML);
 
 	if (renameRecipe !== null) {
-		renameRecipe.addEventListener("submit", (e) => {
+		renameRecipe.addEventListener("submit", async (e) => {
 			e.preventDefault()
 			const renameInput = document.querySelector("#renameInput") as HTMLInputElement | null;
 
@@ -293,15 +321,34 @@ function initializeEditMenuButtons() {
 
 				newDishName = newDishName.replace(/ /g, "_");
 
-				//remember to check if recipe exists
+				if (RM.checkRecipeExists(await recipeListPromise, newDishName) !== -1) {
+					alert("This recipe name is currently in use");
+					return;
+				}
 
+				window.reciMakeAPI.deleteRecipe(activeRecipe);
+				let oldDishName: string = activeRecipe.dishName;
 				activeRecipe.dishName = newDishName;
+				let index: number = RM.checkRecipeExists(await recipeListPromise, oldDishName);
+				recipeListPromise.then(
+					(list) => {
+						list[index].dishName = newDishName;
+					}
+				);
+				window.reciMakeAPI.writeRecipe(activeRecipe);
+				recipeListPromise = window.reciMakeAPI.makeRecipeList();
 
 				if (activeRecipeHTML !== null) {
 					activeRecipeHTML.innerHTML = `Active Recipe: ${activeRecipe.dishName}`
 				}
 			}
 		});
+	}
+
+	const saveRecipe = document.querySelector("#saveRecipe") as HTMLButtonElement | null
+
+	if (saveRecipe !== null) {
+		saveRecipe.addEventListener("click", saveRecipeFunction);
 	}
 
 	const showIngredients = document.querySelector("#showIngredients") as HTMLButtonElement | null;
@@ -312,6 +359,7 @@ function initializeEditMenuButtons() {
 				activeElement.innerHTML = `Ingredients`;
 			}
 			activeList = activeRecipe.ingredients;
+			activeElementString = "ingredients";
 			listLength = activeList.length;
 			const numberInput = document.getElementById("numberInput") as HTMLElement | null;
 			let numberInput2: HTMLElement | null = null;
@@ -351,6 +399,7 @@ function initializeEditMenuButtons() {
 				activeElement.innerHTML = `Instructions`;
 			}
 			activeList = activeRecipe.instructions;
+			activeElementString = "instructions";
 			listLength = activeList.length;
 			const numberInput = document.getElementById("numberInput") as HTMLElement | null;
 			let numberInput2: HTMLElement | null = null;
@@ -390,6 +439,7 @@ function initializeEditMenuButtons() {
 				activeElement.innerHTML = `Modifications`;
 			}
 			activeList = activeRecipe.modifications;
+			activeElementString = "modifications";
 			listLength = activeList.length;
 			const numberInput = document.getElementById("numberInput") as HTMLElement | null;
 			let numberInput2: HTMLElement | null = null;
@@ -433,8 +483,36 @@ function initializeEditMenuButtons() {
 				</form>`
 				activeModeString = "add";
 			}
+			const inputAddText = document.querySelector("#inputAddText") as HTMLFormElement | null;
+
+			if (inputAddText !== null) {
+				inputAddText.addEventListener("submit", (e) => {
+					e.preventDefault();
+					const addText = document.querySelector("#addText") as HTMLInputElement | null;
+					
+					if (addText !== null) {
+						let newText = addText.value.trim();
+
+						if (newText === "") {
+							alert("Nothing was input")
+							return;
+						}
+						
+						activeList.push(newText);
+						listLength = activeList.length;
+
+						if (activeListElement !== null) {
+							activeListElement.innerHTML = RM.makeOrderedHTMLList(activeList);
+						}
+
+					}
+
+				});
+			}
 		})
 	}
+
+
 
 	const editForm = document.querySelector("#edit") as HTMLButtonElement | null;
 
@@ -449,14 +527,60 @@ function initializeEditMenuButtons() {
 				activeMode.innerHTML =
 					`<form id="inputEditFields">
 					<input id="numberInput" type="number" min="1" max="*listLength*" required/>
-					<textarea id="editText" name="editText" placeholder="Edit Text" rows="5" cols="50" required></textarea>
+					<input id="overwriteBool" name="overwriteBool" type="checkbox" value="overwrite">
+					<label for="overwriteBool">Overwrite?</label><br>
+					<p></p>
+					<textarea id="editText" name="editText" placeholder="Edit Text (Submit an empty form to get current text)" rows="5" cols="50"></textarea>
 					<input type ="submit" value="Edit">
 				</form>`
 				activeModeString = "edit";
 			}
+
 			const numberInputEdit = document.getElementById("numberInput") as HTMLElement | null;
 			if (numberInputEdit !== null) {
 				numberInputEdit.setAttribute("max", `${listLength}`);
+			}
+			
+			const inputEditFields = document.querySelector("#inputEditFields") as HTMLFormElement | null;
+
+			if (inputEditFields !== null) {
+				inputEditFields.addEventListener("submit", (e) => {
+					e.preventDefault();
+					const numberInput = document.querySelector("#numberInput") as HTMLInputElement | null;
+					const overwriteBool = document.querySelector("#overwriteBool") as HTMLInputElement | null;
+					const editText = document.querySelector("#editText") as HTMLInputElement | null;
+					const editTextElement = document.getElementById("editText") as HTMLInputElement | null;
+					
+					if (numberInput !== null && overwriteBool !== null && editText !== null) {
+						let target: number = numberInput.valueAsNumber - 1;
+						let overwrite: boolean = overwriteBool.checked;
+						let newText: string = editText.value.trim();
+
+						if (newText === "") {
+							editTextElement.innerHTML = activeList[target];
+							editTextElement.value = editTextElement.innerHTML;
+							return;
+						}
+						
+						if (overwrite) {
+							activeList.splice(target, 1, newText);
+						}
+
+						else {
+							activeList.splice(target, 0, newText);
+							listLength = activeList.length;
+							if (numberInputEdit !== null) {
+								numberInputEdit.setAttribute("max", `${listLength}`);
+							}
+						}
+
+						if (activeListElement !== null) {
+							activeListElement.innerHTML = RM.makeOrderedHTMLList(activeList);
+						}
+
+					}
+
+				});
 			}
 		})
 	}
@@ -473,15 +597,19 @@ function initializeEditMenuButtons() {
 			if (activeMode !== null) {
 				activeMode.innerHTML =
 					`<form id="chooseNumberShift">
-					<p>Shift Location</p>
+					<p>Shift From</p>
 					<input id="numberInput" type="number" min="1" max="*listLength*" required/>
+					<p>Shift To</p>
+					<input id="numberInput2" type="number" min="1" max="*listLength*" required/>
 					<input type="submit" value="Shift">
 				</form>`
 				activeModeString = "shift";
 			}
 			const numberInputShift = document.getElementById("numberInput") as HTMLElement | null;
-			if (numberInputShift !== null) {
+			const numberInput2Shift = document.getElementById("numberInput2") as HTMLElement | null;
+			if (numberInputShift !== null && numberInput2Shift !== null) {
 				numberInputShift.setAttribute("max", `${listLength}`);
+				numberInput2Shift.setAttribute("max", `${listLength}`);
 			}
 		})
 	}
@@ -539,6 +667,24 @@ function initializeEditMenuButtons() {
 			}
 		})
 	}
+
+	showIngredients.click();
+	addForm.click();
 }
 
-loadMainMenu()
+loadMainMenu();
+
+//If statements if needed; might cause doubling up
+/*
+if (activeElementString === "ingredients") {
+	activeRecipe.ingredients.push(newText);
+}
+
+if (activeElementString === "instructions") {
+	activeRecipe.instructions.push(newText);
+}
+
+if (activeElementString === "modifications") {
+	activeRecipe.modifications.push(newText);
+}
+*/

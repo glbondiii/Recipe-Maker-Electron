@@ -51,7 +51,7 @@ export let editMenu: string =
 	<button id="showInstructions">Instructions</button>
 	<button id="showModifications">Modifications</button>
 	<p></p>
-	<p id="activeElement">Ingredients<p>
+	<p id="activeElement"><p>
 	<p></p>
 	<button id="add">Add</button>
 	<button id="edit">Edit</button>
@@ -60,10 +60,7 @@ export let editMenu: string =
 	<button id="delete">Delete</button>
 	<p></p>
 	<div id="activeMode">
-		<form id="inputAddText">
-			<textarea id="addText" name="addText" placeholder="Add Text" rows="5" cols="50" required></textarea>
-			<input type ="submit" value="Add">
-		</form>
+		<form id="inputAddText"></form>
 	</div>
 	<ol id="activeList"></ol>
 	`
