@@ -291,6 +291,7 @@ function initializeMainMenuButtons() {
 			);
 			if (confirm("Make copied recipe the active recipe?")) {
 				activeRecipe = copiedRecipe;
+				window.reciMakeAPI.focusFix();
 			}
 			loadMainMenu();
 		});
@@ -307,8 +308,10 @@ function initializeMainMenuButtons() {
 			}
 
 			if (!confirm(`Are you sure you want to delete ${activeRecipe.dishName}?`)) {
+				window.reciMakeAPI.focusFix();
 				return;
 			}
+			window.reciMakeAPI.focusFix();
 
 			let index: number = RM.checkRecipeExists(await recipeListPromise, activeRecipe.dishName);
 
