@@ -45,6 +45,7 @@ class Recipe {
     set dishName(newName: string) {
 		if (newName.trim() === "") {
 			alert("No name input");
+            window.reciMakeAPI.focusFix();
 			return;
 		}
 		this._dishName = newName.toLowerCase().trim().replace(/ /g, "_");

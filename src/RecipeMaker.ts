@@ -126,6 +126,7 @@ export async function readRecipe(recipeList: Recipe[]): Promise<Recipe> {
 
         if (dishName === "") {
             alert("Please input a recipe name.");
+            window.reciMakeAPI.focusFix();
             return null;
         }
 
@@ -138,8 +139,8 @@ export async function readRecipe(recipeList: Recipe[]): Promise<Recipe> {
         }
 
         else {
-            //alert(`${dishName} not found. Would you like to add this recipe?`);
             if(confirm(`${dishName} not found. Would you like to add this recipe?`)) {
+                window.reciMakeAPI.focusFix();
                 let newRecipe: Recipe = new Recipe(dishName, [], [], []);
                 window.reciMakeAPI.writeRecipe(newRecipe);
                 recipeList.push(newRecipe);
