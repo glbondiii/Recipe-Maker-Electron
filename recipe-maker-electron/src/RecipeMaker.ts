@@ -56,7 +56,7 @@ export function printRecipeList(recipeList: any[]): string {
  * @param list 
  * @returns listString: string
  */
-export function printList(list: string[]): string {  
+export function printStringList(list: string[]): string {  
     let listString: string = "";
 
     let size: number = list.length;
@@ -78,11 +78,27 @@ export function printList(list: string[]): string {
 }
 
 /**
+* Turns a Recipe array into a HTML list
+* @param list
+* @ returns listHTML: string
+*/
+export function makeRecipeHTMLList(list: any[]): string {
+	if (list.length <= 0) {
+		return "<li>Nothing to List</li>";
+	}
+	let listHTML: string = "";
+	list.forEach( (element) => {
+		listHTML = listHTML.concat(`<li>${element._dishName}</li>\n`);
+	})
+	return listHTML;
+}
+
+/**
 * Turns a string array into a HTML ordered list
 * @param list
 * @ returns listHTML: string
 */
-export function makeOrderedHTMLList(list: string[]): string {
+export function makeStringHTMLList(list: string[]): string {
 	if (list.length <= 0) {
 		return "<li>Nothing to List</li>";
 	}

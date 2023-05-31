@@ -4,6 +4,7 @@ const fs: any = require("fs");
 
 /**
  * Makes a list of existing recipes based on the contents of the Recipe folder; if a Recipe folder does not exist, then the function makes one.
+ * Only call once per session
  * @returns recipeList: string[]
  */
 export function makeRecipeList(): Recipe[] {

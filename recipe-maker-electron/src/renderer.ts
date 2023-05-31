@@ -36,23 +36,10 @@ console.log('👋 This message is being logged by "renderer.js", included via we
 //General Menu Variables
 const body: HTMLBodyElement = document.getElementsByTagName("body").item(0);
 let activeMenu: string;
-
-//Resolved Promises are immutable; don't try to use a normal array
+//Resolved Promises are immutable; don't try to use a normal array for recipeList
+//Only make a recipeList once per session
 let recipeListPromise: Promise<Recipe[]> = window.reciMakeAPI.makeRecipeList();
-
-recipeListPromise.then(
-	(list) => {
-		console.log(list);
-		console.log(RM.checkRecipeExists(list, "CaKe"));
-		console.log(RM.checkRecipeExists(list, "rick"));
-		console.log(RM.checkRecipeExists(list, "PIZZA"));
-		console.log(RM.checkRecipeExists(list, "memes"));
-		console.log(RM.checkRecipeExists(list, "willnotwork"));
-	}
-)
-
-let activeRecipe: Recipe = null;;
-console.log(`activeRecipe set to ${activeRecipe}`);
+let activeRecipe: Recipe = null;
 
 //Print Menu Variables
 let dishNameHeader = document.getElementById("dishNameHeader") as HTMLElement | null;
@@ -106,11 +93,13 @@ function loadMainMenu(): void {
 		document.getElementById("activeRecipe").innerHTML = `Active Recipe: N/A`;
 	}
 
+	recipeListPromise.then(
+		(list) => {
+			document.getElementById("recipeList").innerHTML = RM.makeRecipeHTMLList(list);
+		}
+	);
+
 	activeMenu = "main";
-}
-
-function loadRecipeList(): void {
-
 }
 
 function loadPrintMenu(): void {
@@ -127,22 +116,20 @@ function loadPrintMenu(): void {
 	initializeMenuTransportButtons();
 	initializePrintMenuVariables();
 
-	console.log(dishNameHeader); 
-
 	if (dishNameHeader !== null) {
 		dishNameHeader.innerHTML = activeRecipe.dishName;
 	}
 
 	if (ingredientsOL !== null) {
-		ingredientsOL.innerHTML = RM.makeOrderedHTMLList(activeRecipe.ingredients);
+		ingredientsOL.innerHTML = RM.makeStringHTMLList(activeRecipe.ingredients);
 	}
 
 	if (instructionsOL !== null) {
-		instructionsOL.innerHTML = RM.makeOrderedHTMLList(activeRecipe.instructions);
+		instructionsOL.innerHTML = RM.makeStringHTMLList(activeRecipe.instructions);
 	}
 
 	if (modificationsOL !== null) {
-		modificationsOL.innerHTML = RM.makeOrderedHTMLList(activeRecipe.modifications);
+		modificationsOL.innerHTML = RM.makeStringHTMLList(activeRecipe.modifications);
 	}
 
 	activeMenu = "print";
@@ -170,7 +157,7 @@ function loadEditMenu(): void {
 	activeModeString = "add";
 
 	if (activeListElement !== null) {
-		activeListElement.innerHTML = RM.makeOrderedHTMLList(activeList);
+		activeListElement.innerHTML = RM.makeStringHTMLList(activeList);
 	}
 
 	activeMenu = "edit"
@@ -219,6 +206,7 @@ function initializeMenuTransportButtons() {
 }
 
 function initializeMainMenuButtons() {
+	/*
 	const listRecipes = document.querySelector("#listRecipes") as HTMLInputElement | null;
 
 	if (listRecipes !== null) {
@@ -249,11 +237,12 @@ function initializeMainMenuButtons() {
 			recipeListPromise = window.reciMakeAPI.makeRecipeList();
 		});
 	}
+	*/
 
-	const readRecipe = document.querySelector("#readRecipe") as HTMLFormElement | null;
+	const getRecipe = document.querySelector("#getRecipe") as HTMLFormElement | null;
 
-	if (readRecipe !== null) {
-		readRecipe.addEventListener("submit", async (e) => {
+	if (getRecipe !== null) {
+		getRecipe.addEventListener("submit", async (e) => {
 			e.preventDefault();
 			//Problem: Method returning as an any Object, instead of a Recipe Object
 			//Solution (as of 5/23/23): Take the any Object and make the Recipe object in this function
@@ -264,9 +253,8 @@ function initializeMainMenuButtons() {
 			if (activeRecipeAny !== null) {
 				activeRecipe = new Recipe(activeRecipeAny._dishName, activeRecipeAny._ingredients,
 					activeRecipeAny._instructions, activeRecipeAny._modifications);
-				//TODO: Figure out how to get to next screen
 				console.log(activeRecipe);
-				document.getElementById("activeRecipe").innerHTML = `Active Recipe: ${activeRecipe.dishName}`;
+				loadMainMenu();
 			}
 		});
 	}
@@ -274,36 +262,79 @@ function initializeMainMenuButtons() {
 	const copyRecipe = document.querySelector("#copyRecipe") as HTMLInputElement | null;
 
 	if (copyRecipe !== null) {
-		copyRecipe.addEventListener("click", () => {
+		copyRecipe.addEventListener("click", async () => {
 			if (activeRecipe === null) {
 				alert("No active recipe");
+				return;
 			}
-			else {
-				alert(`${activeRecipe.dishName}'s Ingredients\n` +
-					RM.printList(activeRecipe.ingredients));
+			let copyName: string = activeRecipe.dishName.concat("-copy");
+			if (RM.checkRecipeExists(await recipeListPromise, copyName) !== -1) {
+				return;
 			}
+			let copiedRecipe: Recipe = new Recipe(copyName, activeRecipe.ingredients,
+				activeRecipe.instructions, activeRecipe.modifications);
+			window.reciMakeAPI.writeRecipe(copiedRecipe);
+			recipeListPromise.then(
+				(list) => {
+					list.push(copiedRecipe);
+				}
+			);
+			if (confirm("Make copied recipe the active recipe?")) {
+				activeRecipe = copiedRecipe;
+			}
+			loadMainMenu();
 		});
 	}
 
 	const deleteRecipe = document.querySelector("#deleteRecipe") as HTMLInputElement | null;
 
 	if (deleteRecipe !== null) {
-		deleteRecipe.addEventListener("click", () => {
+		deleteRecipe.addEventListener("click", async () => {
 			if (activeRecipe === null) {
 				alert("No active recipe");
 				return;
 			}
+
 			if (!confirm(`Are you sure you want to delete ${activeRecipe.dishName}?`)) {
 				return;
 			}
+
+			let index: number = RM.checkRecipeExists(await recipeListPromise, activeRecipe.dishName);
+
+			recipeListPromise.then(
+				(list) => {
+					list.splice(index, 1);
+				}
+			);
+
 			window.reciMakeAPI.deleteRecipe(activeRecipe);
-			recipeListPromise = window.reciMakeAPI.makeRecipeList();
-			location.reload();
+			activeRecipe = null;
+			loadMainMenu();
 		});
 	}
 }
 
 function initializeEditMenuButtons() {
+	const getRecipe = document.querySelector("#getRecipe") as HTMLFormElement | null;
+
+	if (getRecipe !== null) {
+		getRecipe.addEventListener("submit", async (e) => {
+			e.preventDefault();
+			//Problem: Method returning as an any Object, instead of a Recipe Object
+			//Solution (as of 5/23/23): Take the any Object and make the Recipe object in this function
+			//with the fields of that object
+			//NOTE: THIS APPLIES FOR BASICALLY ANY FUNCTION THAT USES Recipe AS AN ARGUMENT
+			let activeRecipeAny: any = await RM.readRecipe(await recipeListPromise);
+
+			if (activeRecipeAny !== null) {
+				activeRecipe = new Recipe(activeRecipeAny._dishName, activeRecipeAny._ingredients,
+					activeRecipeAny._instructions, activeRecipeAny._modifications);
+				console.log(activeRecipe);
+				loadEditMenu();
+			}
+		});
+	}
+
 	const renameRecipe = document.querySelector("#renameRecipe") as HTMLFormElement | null;
 
 	if (renameRecipe !== null) {
@@ -335,8 +366,8 @@ function initializeEditMenuButtons() {
 						list[index].dishName = newDishName;
 					}
 				);
+
 				window.reciMakeAPI.writeRecipe(activeRecipe);
-				recipeListPromise = window.reciMakeAPI.makeRecipeList();
 
 				if (activeRecipeHTML !== null) {
 					activeRecipeHTML.innerHTML = `Active Recipe: ${activeRecipe.dishName}`
@@ -386,7 +417,7 @@ function initializeEditMenuButtons() {
 			}
 
 			if (activeListElement !== null) {
-				activeListElement.innerHTML = RM.makeOrderedHTMLList(activeList);
+				activeListElement.innerHTML = RM.makeStringHTMLList(activeList);
 			}
 		})
 	}
@@ -426,7 +457,7 @@ function initializeEditMenuButtons() {
 			}
 
 			if (activeListElement !== null) {
-				activeListElement.innerHTML = RM.makeOrderedHTMLList(activeList);
+				activeListElement.innerHTML = RM.makeStringHTMLList(activeList);
 			}
 		})
 	}
@@ -465,7 +496,7 @@ function initializeEditMenuButtons() {
 			}
 
 			if (activeListElement !== null) {
-				activeListElement.innerHTML = RM.makeOrderedHTMLList(activeList);
+				activeListElement.innerHTML = RM.makeStringHTMLList(activeList);
 			}
 		})
 	}
@@ -489,7 +520,7 @@ function initializeEditMenuButtons() {
 				inputAddText.addEventListener("submit", (e) => {
 					e.preventDefault();
 					const addText = document.querySelector("#addText") as HTMLInputElement | null;
-					
+
 					if (addText !== null) {
 						let newText = addText.value.trim();
 
@@ -497,12 +528,12 @@ function initializeEditMenuButtons() {
 							alert("Nothing was input")
 							return;
 						}
-						
+
 						activeList.push(newText);
 						listLength = activeList.length;
 
 						if (activeListElement !== null) {
-							activeListElement.innerHTML = RM.makeOrderedHTMLList(activeList);
+							activeListElement.innerHTML = RM.makeStringHTMLList(activeList);
 						}
 
 					}
@@ -540,7 +571,7 @@ function initializeEditMenuButtons() {
 			if (numberInputEdit !== null) {
 				numberInputEdit.setAttribute("max", `${listLength}`);
 			}
-			
+
 			const inputEditFields = document.querySelector("#inputEditFields") as HTMLFormElement | null;
 
 			if (inputEditFields !== null) {
@@ -550,7 +581,7 @@ function initializeEditMenuButtons() {
 					const overwriteBool = document.querySelector("#overwriteBool") as HTMLInputElement | null;
 					const editText = document.querySelector("#editText") as HTMLInputElement | null;
 					const editTextElement = document.getElementById("editText") as HTMLInputElement | null;
-					
+
 					if (numberInput !== null && overwriteBool !== null && editText !== null) {
 						let target: number = numberInput.valueAsNumber - 1;
 						let overwrite: boolean = overwriteBool.checked;
@@ -561,7 +592,7 @@ function initializeEditMenuButtons() {
 							editTextElement.value = editTextElement.innerHTML;
 							return;
 						}
-						
+
 						if (overwrite) {
 							activeList.splice(target, 1, newText);
 						}
@@ -575,7 +606,7 @@ function initializeEditMenuButtons() {
 						}
 
 						if (activeListElement !== null) {
-							activeListElement.innerHTML = RM.makeOrderedHTMLList(activeList);
+							activeListElement.innerHTML = RM.makeStringHTMLList(activeList);
 						}
 
 					}
@@ -607,9 +638,39 @@ function initializeEditMenuButtons() {
 			}
 			const numberInputShift = document.getElementById("numberInput") as HTMLElement | null;
 			const numberInput2Shift = document.getElementById("numberInput2") as HTMLElement | null;
+
 			if (numberInputShift !== null && numberInput2Shift !== null) {
 				numberInputShift.setAttribute("max", `${listLength}`);
 				numberInput2Shift.setAttribute("max", `${listLength}`);
+			}
+
+			const chooseNumberShift = document.querySelector("#chooseNumberShift") as HTMLFormElement | null;
+
+			if (chooseNumberShift !== null) {
+				chooseNumberShift.addEventListener("submit", (e) => {
+					e.preventDefault();
+					const numberInput = document.querySelector("#numberInput") as HTMLInputElement | null;
+					const numberInput2 = document.querySelector("#numberInput2") as HTMLInputElement | null;
+
+					if (numberInput !== null && numberInput2 !== null) {
+						let location: number = numberInput.valueAsNumber - 1;
+						let target: number = numberInput2.valueAsNumber - 1;
+
+						if (location === target) {
+							return;
+						}
+
+						let toShift: string = activeList[location];
+						activeList.splice(location, 1);
+						activeList.splice(target, 0, toShift);
+
+						if (activeListElement !== null) {
+							activeListElement.innerHTML = RM.makeStringHTMLList(activeList);
+						}
+
+					}
+
+				});
 			}
 		})
 	}
@@ -640,6 +701,35 @@ function initializeEditMenuButtons() {
 				numberInputSwap.setAttribute("max", `${listLength}`);
 				numberInput2Swap.setAttribute("max", `${listLength}`);
 			}
+
+			const chooseNumberSwap = document.querySelector("#chooseNumberSwap") as HTMLFormElement | null;
+
+			if (chooseNumberSwap !== null) {
+				chooseNumberSwap.addEventListener("submit", (e) => {
+					e.preventDefault();
+					const numberInput = document.querySelector("#numberInput") as HTMLInputElement | null;
+					const numberInput2 = document.querySelector("#numberInput2") as HTMLInputElement | null;
+
+					if (numberInput !== null && numberInput2 !== null) {
+						let swap1: number = numberInput.valueAsNumber - 1;
+						let swap2: number = numberInput2.valueAsNumber - 1;
+
+						if (swap1 === swap2) {
+							return;
+						}
+
+						let tmp: string = activeList[swap1];
+						activeList[swap1] = activeList[swap2]
+						activeList[swap2] = tmp;
+
+						if (activeListElement !== null) {
+							activeListElement.innerHTML = RM.makeStringHTMLList(activeList);
+						}
+
+					}
+
+				});
+			}
 		})
 	}
 
@@ -665,6 +755,31 @@ function initializeEditMenuButtons() {
 			if (numberInputDelete !== null) {
 				numberInputDelete.setAttribute("max", `${listLength}`);
 			}
+
+			const chooseNumberDelete = document.querySelector("#chooseNumberDelete") as HTMLFormElement | null;
+
+			if (chooseNumberDelete !== null) {
+				chooseNumberDelete.addEventListener("submit", (e) => {
+					e.preventDefault();
+					const numberInput = document.querySelector("#numberInput") as HTMLInputElement | null;
+
+					if (numberInput !== null) {
+						let target: number = numberInput.valueAsNumber - 1;
+
+						activeList.splice(target, 1);
+						listLength = activeList.length;
+						if (numberInputDelete!== null) {
+							numberInputDelete.setAttribute("max", `${listLength}`);
+						}
+
+						if (activeListElement !== null) {
+							activeListElement.innerHTML = RM.makeStringHTMLList(activeList);
+						}
+
+					}
+
+				});
+			}
 		})
 	}
 
@@ -674,7 +789,7 @@ function initializeEditMenuButtons() {
 
 loadMainMenu();
 
-//If statements if needed; might cause doubling up
+//If statements if needed; might cause doubling up; put in editButton init function
 /*
 if (activeElementString === "ingredients") {
 	activeRecipe.ingredients.push(newText);

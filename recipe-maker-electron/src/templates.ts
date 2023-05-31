@@ -1,22 +1,29 @@
 export let mainMenu: string = 
     `
 	<h1>Recipe Maker Electron</h1>
+	<!--
     <button id="listRecipes">List Recipes</button>
-    <!--
     <p></p>
     <button id="addRecipe">Add Recipe</button>
     -->
     <p></p>
-    <form id="readRecipe">
+    <p>Enter the name of the dish you want to read: </p>
+    <p></p>
+    <form id="getRecipe">
         <input autocomplete="off" autofocus id="dishNameInput" placeholder="Dish Name" type="text" required>
         <input type="submit">
     </form>
-    <p id="activeRecipe"></p>
+	<p></p>
+    <strong id="activeRecipe"></strong>
+	<p></p>
     <button id="copyRecipe">Copy Recipe</button>
     <button id="deleteRecipe">Delete Recipe</button>
 	<p></p>
 	<button id="printRecipe">Print Recipe</button>
 	<button id="editRecipe">Edit Recipe</button>
+	<p></p>
+	<h3>Current Recipes</h3>
+	<ul id="recipeList"></ul>
 	`
 
 export let printMenu: string = 
@@ -38,6 +45,11 @@ export let editMenu: string =
 	`
 	<h1>Edit Recipe</h1>
 	<h2 id="activeRecipeHTML"></h2>
+    <form id="getRecipe">
+        <input autocomplete="off" autofocus id="dishNameInput" placeholder="Change Active Recipe" type="text" required>
+        <input type="submit">
+    </form>
+	<p></p>
 	<form id="renameRecipe">
 		<input autocomplete="off" autofocus id="renameInput" placeholder="Rename Recipe" type="text" required>
 		<input type="submit">
