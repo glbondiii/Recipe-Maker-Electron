@@ -9,4 +9,5 @@ contextBridge.exposeInMainWorld('reciMakeAPI', {
     readRecipe: (dishName: string): Promise<Recipe> => ipcRenderer.invoke("readRecipe", dishName),
     writeRecipe: (recipe: Recipe) => ipcRenderer.invoke("writeRecipe", recipe),
     deleteRecipe: (recipe: Recipe) => ipcRenderer.invoke("deleteRecipe", recipe),
+    focusFix: () => ipcRenderer.send('focus-fix'),
 });
