@@ -24,8 +24,10 @@ const createWindow = (): void => {
 
     //HOPEFULLY TEMPORARY FIX
     ipcMain.on('focus-fix', () => {
-        mainWindow.blur();
-        mainWindow.focus();
+        if (process.platform === "win32") {
+            mainWindow.blur();
+            mainWindow.focus();
+        }
     });
 
     // and load the index.html of the app.
