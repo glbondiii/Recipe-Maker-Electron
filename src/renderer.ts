@@ -61,6 +61,7 @@ let activeListElement = document.getElementById("activeList") as HTMLElement | n
 async function saveRecipeFunction(): Promise<void> {
 	if (activeRecipe === null) {
 		alert("No active recipe");
+		window.reciMakeAPI.focusFix();
 		return;
 	}
 
@@ -105,6 +106,7 @@ function loadMainMenu(): void {
 function loadPrintMenu(): void {
 	if (activeRecipe === null) {
 		alert("No active recipe");
+		window.reciMakeAPI.focusFix();
 		return;
 	}
 
@@ -138,6 +140,7 @@ function loadPrintMenu(): void {
 function loadEditMenu(): void {
 	if (activeRecipe === null) {
 		alert("No active recipe");
+		window.reciMakeAPI.focusFix();
 		return;
 	}
 
@@ -212,6 +215,8 @@ function initializeMainMenuButtons() {
 	if (listRecipes !== null) {
 		listRecipes.addEventListener("click", async () => {
 			alert("List of Recipes:\n" + RM.printRecipeList(await recipeListPromise));
+            ipcRenderer.send('focus-fix');
+		window.reciMakeAPI.focusFix();
 		});
 	}
 
@@ -226,10 +231,14 @@ function initializeMainMenuButtons() {
 			}
 			if (dishNameInput === "") {
 				alert("No name entered");
+            ipcRenderer.send('focus-fix');
+		window.reciMakeAPI.focusFix();
 				return;
 			}
 			if (RM.checkRecipeExists(await recipeListPromise, dishNameInput)) {
 				alert("Recipe already exists.");
+            ipcRenderer.send('focus-fix');
+		window.reciMakeAPI.focusFix();
 				return;
 			}
 			activeRecipe = new Recipe(dishNameInput, [], [], []);
@@ -265,6 +274,7 @@ function initializeMainMenuButtons() {
 		copyRecipe.addEventListener("click", async () => {
 			if (activeRecipe === null) {
 				alert("No active recipe");
+				window.reciMakeAPI.focusFix();
 				return;
 			}
 			let copyName: string = activeRecipe.dishName.concat("-copy");
@@ -281,6 +291,7 @@ function initializeMainMenuButtons() {
 			);
 			if (confirm("Make copied recipe the active recipe?")) {
 				activeRecipe = copiedRecipe;
+				window.reciMakeAPI.focusFix();
 			}
 			loadMainMenu();
 		});
@@ -292,12 +303,15 @@ function initializeMainMenuButtons() {
 		deleteRecipe.addEventListener("click", async () => {
 			if (activeRecipe === null) {
 				alert("No active recipe");
+				window.reciMakeAPI.focusFix();
 				return;
 			}
 
 			if (!confirm(`Are you sure you want to delete ${activeRecipe.dishName}?`)) {
+				window.reciMakeAPI.focusFix();
 				return;
 			}
+			window.reciMakeAPI.focusFix();
 
 			let index: number = RM.checkRecipeExists(await recipeListPromise, activeRecipe.dishName);
 
@@ -347,6 +361,7 @@ function initializeEditMenuButtons() {
 
 				if (newDishName === "") {
 					alert("Please input a recipe name");
+					window.reciMakeAPI.focusFix();
 					return;
 				}
 
@@ -354,6 +369,7 @@ function initializeEditMenuButtons() {
 
 				if (RM.checkRecipeExists(await recipeListPromise, newDishName) !== -1) {
 					alert("This recipe name is currently in use");
+					window.reciMakeAPI.focusFix();
 					return;
 				}
 
@@ -405,6 +421,7 @@ function initializeEditMenuButtons() {
 				}
 				if (addForm === null) {
 					alert("Something went wrong; please exit the app and contact the developers");
+					window.reciMakeAPI.focusFix();
 					return
 				}
 
@@ -445,6 +462,7 @@ function initializeEditMenuButtons() {
 				}
 				if (addForm === null) {
 					alert("Something went wrong; please exit the app and contact the developers");
+					window.reciMakeAPI.focusFix();
 					return
 				}
 
@@ -485,6 +503,7 @@ function initializeEditMenuButtons() {
 				}
 				if (addForm === null) {
 					alert("Something went wrong; please exit the app and contact the developers");
+					window.reciMakeAPI.focusFix();
 					return
 				}
 				numberInput.setAttribute("max", `${listLength}`);
@@ -526,6 +545,7 @@ function initializeEditMenuButtons() {
 
 						if (newText === "") {
 							alert("Nothing was input")
+							window.reciMakeAPI.focusFix();
 							return;
 						}
 
@@ -551,6 +571,7 @@ function initializeEditMenuButtons() {
 		editForm.addEventListener("click", () => {
 			if (listLength <= 0) {
 				alert("Nothing to edit");
+				window.reciMakeAPI.focusFix();
 				return;
 			}
 			console.log("Rendering edit form");
@@ -622,6 +643,7 @@ function initializeEditMenuButtons() {
 		shiftForm.addEventListener("click", () => {
 			if (listLength <= 0) {
 				alert("Nothing to shift");
+				window.reciMakeAPI.focusFix();
 				return;
 			}
 			console.log("Rendering shift form");
@@ -681,6 +703,7 @@ function initializeEditMenuButtons() {
 		swapForm.addEventListener("click", () => {
 			if (listLength <= 1) {
 				alert("Nothing to swap");
+				window.reciMakeAPI.focusFix();
 				return;
 			}
 			console.log("Rendering swap form");
@@ -739,6 +762,7 @@ function initializeEditMenuButtons() {
 		deleteForm.addEventListener("click", () => {
 			if (listLength <= 0) {
 				alert("Nothing to delete");
+				window.reciMakeAPI.focusFix();
 				return;
 			}
 			console.log("Rendering delete form");
