@@ -10,7 +10,10 @@ class Recipe {
     //Constructor
     public constructor(dishName: string, ingredients: string[], 
         instructions: string[], modifications: string[]) {
-        this._dishName = dishName.toLowerCase().trim();
+		if (dishName.trim() === "") {
+			return null;
+		}
+        this._dishName = dishName.toLowerCase().trim().replace(/ /g, "_");
         this._fileName = "Recipes/" + this._dishName + ".json";
         this._ingredients = ingredients;
         this._instructions = instructions;
@@ -40,7 +43,11 @@ class Recipe {
 
     //Setters
     set dishName(newName: string) {
-        this._dishName = newName.toLowerCase().trim();
+		if (newName.trim() === "") {
+			alert("No name input");
+			return;
+		}
+		this._dishName = newName.toLowerCase().trim().replace(/ /g, "_");
         this._fileName = "Recipe/" + this._dishName + ".json";
     }
 
