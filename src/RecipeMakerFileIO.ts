@@ -3,6 +3,27 @@ import Recipe from "./Recipe";
 const fs: any = require("fs");
 
 /**
+* Converts the contents of a given HTML file into a string
+* @param HTMLFilePath: string
+* @returns HTMLString if success; Error Message if no succcess
+*/
+export function HTMLToString(HTMLFilePath: string): string {
+	let HTMLString: string;
+
+	try {
+		HTMLString = fs.readFileSync(HTMLFilePath, {encoding: 'utf8', flag: 'r'});
+	}
+
+	catch (error: any) {
+		console.log(error);
+		return "Something went wrong, please try again or contact developers";
+	}
+
+	return HTMLString;
+	
+}	
+
+/**
  * Makes a list of existing recipes based on the contents of the Recipe folder; if a Recipe folder does not exist, then the function makes one.
  * Only call once per session
  * @returns recipeList: string[]
