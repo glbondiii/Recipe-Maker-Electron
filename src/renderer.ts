@@ -78,12 +78,12 @@ async function saveRecipeFunction(): Promise<void> {
 
 
 //Menu Loading Functions
-function loadMainMenu(): void {
+async function loadMainMenu(): Promise<void> {
 	if (activeMenu === "edit") {
 		saveRecipeFunction();
 	}
 
-	body.innerHTML = Templates.mainMenu;
+	body.innerHTML = await Templates.mainMenu;
 	initializeMenuTransportButtons();
 	initializeMainMenuButtons();
 
@@ -103,7 +103,7 @@ function loadMainMenu(): void {
 	activeMenu = "main";
 }
 
-function loadPrintMenu(): void {
+async function loadPrintMenu(): Promise<void> {
 	if (activeRecipe === null) {
 		alert("No active recipe");
 		window.reciMakeAPI.focusFix();
@@ -114,7 +114,7 @@ function loadPrintMenu(): void {
 		saveRecipeFunction();
 	}
 
-	body.innerHTML = Templates.printMenu;
+	body.innerHTML = await Templates.printMenu;
 	initializeMenuTransportButtons();
 	initializePrintMenuVariables();
 
@@ -137,14 +137,14 @@ function loadPrintMenu(): void {
 	activeMenu = "print";
 }
 
-function loadEditMenu(): void {
+async function loadEditMenu(): Promise<void> {
 	if (activeRecipe === null) {
 		alert("No active recipe");
 		window.reciMakeAPI.focusFix();
 		return;
 	}
 
-	body.innerHTML = Templates.editMenu;
+	body.innerHTML = await Templates.editMenu;
 	initializeMenuTransportButtons();
 	initializeEditMenuVariables();
 	initializeEditMenuButtons();

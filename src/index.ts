@@ -41,17 +41,22 @@ const createWindow = (): void => {
 // initialization and is ready to create browser windows.
 // Some APIs can only be used after this event occurs.
 app.on('ready', () => {
+	ipcMain.handle("HTMLToString", (event, HTMLFilePath: string): string => {
+		let HTMLString = RMIO.HTMLToString(HTMLFilePath);
+		return HTMLString;
+	});
     ipcMain.handle("makeRecipeList", RMIO.makeRecipeList);
     ipcMain.handle("readRecipe", (event, dishName: string): Recipe => {
         let recipe: Recipe = RMIO.readRecipe(dishName);
         return recipe;
-    })
+    });
     ipcMain.handle("writeRecipe", (event, recipe: Recipe) => {
         RMIO.writeRecipe(recipe);
     });
     ipcMain.handle("deleteRecipe", (event, recipe: Recipe) => {
         RMIO.deleteRecipe(recipe);
-    })
+    });
+
 
     createWindow();
 });
