@@ -92,4 +92,4 @@ typings/
 out/
 
 # Nix Files
-*.nix
+result
