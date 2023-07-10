@@ -6,11 +6,5 @@
       config.projectRoot = ./.;
       source = ./.;
       projects = ./projects.toml;
-	  settings = [
-		{
-			subsystemInfo.noDev = true;
-			subsystemInfo.nodejs = 18;
-		}
-	  ];
     };
 }
