@@ -7,3 +7,7 @@ If you plan to work on the GUI, start by reading the .html files in the HTMLTemp
 If you plan to work on the functionality, read over and start working in any of the .ts files.  
 If you know anyone who would like to help with development, please direct them to the project.  
 Thank you for your help!  
+
+N.B If you are a NixOS user, I have not been able to figure out how to work on this project with NixOS. If you have any ideas
+on how to get this project working on there, please let me know. Otherwise, my advice is to use a different computer or use a 
+virtual machine.
