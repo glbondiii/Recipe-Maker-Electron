@@ -13,7 +13,7 @@
       in
       {
         devShells.default = pkgs.mkShell {
-          packages = [ pkgs.bashInteractive ];
+          packages = [];
           nativeBuildInputs = [
             pkgs.nodejs_20
             pkgs.typescript
