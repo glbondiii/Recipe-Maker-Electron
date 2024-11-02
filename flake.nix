@@ -15,7 +15,7 @@
         devShells.default = pkgs.mkShell {
           packages = [];
           nativeBuildInputs = [
-            pkgs.nodejs_20
+            pkgs.nodejs_22
             pkgs.typescript
           ];
           buildInputs = [ ];
