@@ -19,6 +19,9 @@
             pkgs.typescript
           ];
           buildInputs = [ ];
+          shellHook = ''
+            nix flake update
+          '';
 
           NIX_LD_LIBRARY_PATH = with pkgs; lib.makeLibraryPath [
             stdenv.cc.cc
@@ -106,7 +109,7 @@
             # ...
             ];
 
-            # NIX_LD = pkgs.lib.fileContents "${pkgs.stdenv.cc}/nix-support/dynamic-linker";
+            NIX_LD = pkgs.lib.fileContents "${pkgs.stdenv.cc}/nix-support/dynamic-linker";
         };
       });
 }
