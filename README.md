@@ -8,6 +8,9 @@ If you plan to work on the functionality, read over and start working in any of 
 If you know anyone who would like to help with development, please direct them to the project.  
 Thank you for your help!  
 
-N.B If you are a NixOS user, I have not been able to figure out how to work on this project with NixOS. If you have any ideas
-on how to get this project working on there, please let me know. Otherwise, my advice is to use a different computer or use a 
-virtual machine.
+n.b To test/build on NixOS
+1. Enable nix-ld (sorry, this is the current way)
+2. To test, run "nix-shell --run 'npm start'" in the project root directory
+3. To build, run "nix-shell" to enter a shell where you should be able to build normally
+* Note: If there are any missing/unneccessary packages inside shell.nix, please let me know and
+change as you see fit
