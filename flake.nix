@@ -19,9 +19,6 @@
             pkgs.typescript
           ];
           buildInputs = [ ];
-          shellHook = ''
-            nix flake update
-          '';
 
           NIX_LD_LIBRARY_PATH = with pkgs; lib.makeLibraryPath [
             stdenv.cc.cc
@@ -92,14 +89,14 @@
             librsvg
             xorg.libXft
             libvdpau
-            gnome2.pango
+            pango
             cairo
             atk
             gdk-pixbuf
             fontconfig
             freetype
             dbus
-            alsaLib
+            alsa-lib
             expat
 
             # Needed for electron
